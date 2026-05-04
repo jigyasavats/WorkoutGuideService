@@ -1,4 +1,4 @@
-# WorkoutGuideService
+# AI-WorkoutGuideService
 
 A .NET 8 console application that helps users track workouts, monitor progress, and get AI-powered fitness advice. Built with Azure Cosmos DB for data storage and Azure OpenAI for intelligent recommendations.
 
