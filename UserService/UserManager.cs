@@ -21,7 +21,7 @@ public sealed class UserManager
 
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email))
         {
-            Console.WriteLine("❌ Name and email are required.\n");
+            Console.WriteLine("Name and email are required.\n");
             return;
         }
 
@@ -36,7 +36,7 @@ public sealed class UserManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error creating user: {ex.Message}\n");
+            Console.WriteLine($"Error creating user: {ex.Message}\n");
         }
     }
 
@@ -47,7 +47,7 @@ public sealed class UserManager
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            Console.WriteLine("❌ Email is required.\n");
+            Console.WriteLine("Email is required.\n");
             return;
         }
 
@@ -56,11 +56,11 @@ public sealed class UserManager
             var user = await _repository.GetUserByEmailAsync(email);
             if (user is null)
             {
-                Console.WriteLine($"❌ No user found with email: {email}\n");
+                Console.WriteLine($"No user found with email: {email}\n");
             }
             else
             {
-                Console.WriteLine($"\n✓ User found:");
+                Console.WriteLine($"\nUser found:");
                 Console.WriteLine($"  ID: {user.Id}");
                 Console.WriteLine($"  Email: {user.Email}");
                 Console.WriteLine($"  Name: {user.Name}\n");
@@ -68,7 +68,7 @@ public sealed class UserManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error retrieving user: {ex.Message}\n");
+            Console.WriteLine($"Error retrieving user: {ex.Message}\n");
         }
     }
 }

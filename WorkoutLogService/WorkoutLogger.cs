@@ -21,14 +21,14 @@ public sealed class WorkoutLogger
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            Console.WriteLine("❌ Email is required.\n");
+            Console.WriteLine("Email is required.\n");
             return;
         }
 
         var user = await _userRepository.GetUserByEmailAsync(email);
         if (user is null)
         {
-            Console.WriteLine($"❌ No user found with email: {email}. Please register first.\n");
+            Console.WriteLine($"No user found with email: {email}. Please register first.\n");
             return;
         }
 
@@ -47,7 +47,7 @@ public sealed class WorkoutLogger
 
             if (!int.TryParse(dayInput, out int dayIndex) || dayIndex < 1 || dayIndex > days.Length)
             {
-                Console.WriteLine("❌ Invalid selection.\n");
+                Console.WriteLine("Invalid selection.\n");
                 continue;
             }
             var selectedDay = days[dayIndex - 1];
@@ -64,7 +64,7 @@ public sealed class WorkoutLogger
 
             if (!int.TryParse(exInput, out int exIndex) || exIndex < 1 || exIndex > exercises.Length)
             {
-                Console.WriteLine("❌ Invalid selection.\n");
+                Console.WriteLine("Invalid selection.\n");
                 continue;
             }
             var selectedExercise = exercises[exIndex - 1];
@@ -73,21 +73,21 @@ public sealed class WorkoutLogger
             Console.Write("Sets: ");
             if (!int.TryParse(Console.ReadLine(), out int sets) || sets <= 0)
             {
-                Console.WriteLine("❌ Invalid sets value.\n");
+                Console.WriteLine("Invalid sets value.\n");
                 continue;
             }
 
             Console.Write("Reps: ");
             if (!int.TryParse(Console.ReadLine(), out int reps) || reps <= 0)
             {
-                Console.WriteLine("❌ Invalid reps value.\n");
+                Console.WriteLine("Invalid reps value.\n");
                 continue;
             }
 
             Console.Write("Weight (kg): ");
             if (!double.TryParse(Console.ReadLine(), out double weight) || weight < 0)
             {
-                Console.WriteLine("❌ Invalid weight value.\n");
+                Console.WriteLine("Invalid weight value.\n");
                 continue;
             }
 
@@ -103,7 +103,7 @@ public sealed class WorkoutLogger
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error logging workout: {ex.Message}");
+                Console.WriteLine($"Error logging workout: {ex.Message}");
             }
 
             Console.Write("\nLog another exercise? (y/n): ");

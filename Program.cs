@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Repository;
 using UserService;
 using WorkoutLogService;
+using WorkoutRedinessService;
 
 var config = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -46,6 +47,8 @@ var workoutRepository = new WorkoutRepository(workoutContainerResponse.Container
 
 var userManager = new UserManager(userRepository);
 var workoutLogger = new WorkoutLogger(userRepository, workoutRepository);
+var progressViewer = new ProgressViewer(userRepository, workoutRepository);
+var readinessChecker = new ReadyForNextLevel(userRepository, workoutRepository);
 
 Console.WriteLine("✓ Cosmos DB connection initialized.\n");
 
@@ -76,21 +79,21 @@ while (running)
             await workoutLogger.LogWorkoutAsync();
             break;
         case "4":
-            Console.WriteLine("📊 View progress functionality - Coming soon");
+            await progressViewer.ViewProgressAsync();
             break;
         case "5":
-            Console.WriteLine("⭐ Check readiness functionality - Coming soon");
+            await readinessChecker.CheckReadinessAsync();
             break;
         case "6":
             running = false;
             Console.WriteLine("\nGoodbye!");
             break;
         default:
-            Console.WriteLine("❌ Invalid option. Please try again.\n");
+            Console.WriteLine("Invalid option. Please try again.\n");
             break;
     }
 
-    if (running && choice != "1" && choice != "2" && choice != "3")
+    if (running && choice != "1" && choice != "2" && choice != "3" && choice != "4")
     {
         Console.WriteLine();
     }
