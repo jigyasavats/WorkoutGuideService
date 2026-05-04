@@ -66,6 +66,10 @@ var workoutLogger = new WorkoutLogger(userRepository, workoutRepository);
 var aiAdvisor = new WorkoutAiAdvisor(openAiEndpoint, openAiApiKey, openAiDeploymentName);
 var progressViewer = new ProgressViewer(userRepository, workoutRepository, aiAdvisor);
 var readinessChecker = new ReadyForNextLevel(userRepository, workoutRepository, aiAdvisor);
+var planGenerator = new WorkoutPlanGenerator(userRepository, workoutRepository, aiAdvisor);
+var formTipAdvisor = new FormTipAdvisor(aiAdvisor);
+var recoveryAdvisor = new RecoveryAdvisor(userRepository, workoutRepository, aiAdvisor);
+var nutritionAdvisor = new NutritionAdvisor(userRepository, workoutRepository, aiAdvisor);
 
 Console.WriteLine("Cosmos DB and Azure OpenAI initialized.\n");
 
@@ -74,13 +78,17 @@ bool running = true;
 while (running)
 {
     Console.WriteLine("=== Workout Guide System ===");
-    Console.WriteLine("1. Add a new user");
-    Console.WriteLine("2. Get user profile");
-    Console.WriteLine("3. Log workout details");
-    Console.WriteLine("4. View progress");
-    Console.WriteLine("5. Check readiness for next level");
-    Console.WriteLine("6. Exit");
-    Console.Write("\nSelect an option (1-6): ");
+    Console.WriteLine("1.  Add a new user");
+    Console.WriteLine("2.  Get user profile");
+    Console.WriteLine("3.  Log workout details");
+    Console.WriteLine("4.  View progress");
+    Console.WriteLine("5.  Check readiness for next level");
+    Console.WriteLine("6.  AI Workout Plan Generator");
+    Console.WriteLine("7.  Form and Technique Tips");
+    Console.WriteLine("8.  Recovery Advisor");
+    Console.WriteLine("9.  Nutrition Suggestions");
+    Console.WriteLine("10. Exit");
+    Console.Write("\nSelect an option (1-10): ");
     
     var choice = Console.ReadLine();
 
@@ -102,6 +110,18 @@ while (running)
             await readinessChecker.CheckReadinessAsync();
             break;
         case "6":
+            await planGenerator.GeneratePlanAsync();
+            break;
+        case "7":
+            await formTipAdvisor.GetFormTipsAsync();
+            break;
+        case "8":
+            await recoveryAdvisor.GetRecoveryAdviceAsync();
+            break;
+        case "9":
+            await nutritionAdvisor.GetNutritionAdviceAsync();
+            break;
+        case "10":
             running = false;
             Console.WriteLine("\nGoodbye!");
             break;
@@ -110,7 +130,7 @@ while (running)
             break;
     }
 
-    if (running && choice != "1" && choice != "2" && choice != "3" && choice != "4")
+    if (running)
     {
         Console.WriteLine();
     }
