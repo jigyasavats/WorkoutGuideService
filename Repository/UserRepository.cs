@@ -1,6 +1,6 @@
 using Microsoft.Azure.Cosmos;
 
-namespace UserService;
+namespace Repository;
 
 public sealed class UserRepository
 {
@@ -11,13 +11,13 @@ public sealed class UserRepository
         _container = container;
     }
 
-    public async Task<User> CreateUserAsync(User user)
+    public async Task<UserService.User> CreateUserAsync(UserService.User user)
     {
         var response = await _container.CreateItemAsync(user, new PartitionKey(user.Email));
         return response.Resource;
     }
 
-    public async Task<User?> GetUserByEmailAsync(string email)
+    public async Task<UserService.User?> GetUserByEmailAsync(string email)
     {
         var query = new QueryDefinition("SELECT * FROM c WHERE c.Email = @email")
             .WithParameter("@email", email);
@@ -27,7 +27,7 @@ public sealed class UserRepository
             PartitionKey = new PartitionKey(email)
         };
 
-        using var iterator = _container.GetItemQueryIterator<User>(query, requestOptions: requestOptions);
+        using var iterator = _container.GetItemQueryIterator<UserService.User>(query, requestOptions: requestOptions);
 
         while (iterator.HasMoreResults)
         {

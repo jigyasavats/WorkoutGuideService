@@ -1,7 +1,9 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
+using Repository;
 using UserService;
+using WorkoutLogService;
 
 var config = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -12,11 +14,13 @@ var vaultUri = config["KeyVault:VaultUri"];
 var secretName = config["CosmosDb:ConnectionStringSecretName"];
 var databaseId = config["CosmosDb:DatabaseId"];
 var containerId = config["CosmosDb:ContainerId"];
+var workoutContainerId = config["CosmosDb:WorkoutContainerId"];
 
 if (string.IsNullOrWhiteSpace(vaultUri)
     || string.IsNullOrWhiteSpace(secretName)
     || string.IsNullOrWhiteSpace(databaseId)
-    || string.IsNullOrWhiteSpace(containerId))
+    || string.IsNullOrWhiteSpace(containerId)
+    || string.IsNullOrWhiteSpace(workoutContainerId))
 {
     Console.WriteLine("Key Vault or Cosmos DB configuration is missing. Please update appsettings.json.");
     return;
@@ -32,8 +36,16 @@ if (string.IsNullOrWhiteSpace(cosmosConnectionString))
     return;
 }
 
-var cosmosService = await CosmosDbService.CreateAsync(cosmosConnectionString, databaseId, containerId);
-var userRepository = new UserRepository(cosmosService.Container);
+var cosmosService = await CosmosDbService.CreateAsync(cosmosConnectionString, databaseId);
+
+var userContainerResponse = await cosmosService.Database.CreateContainerIfNotExistsAsync(containerId, "/Email");
+var userRepository = new UserRepository(userContainerResponse.Container);
+
+var workoutContainerResponse = await cosmosService.Database.CreateContainerIfNotExistsAsync(workoutContainerId, "/UserEmail");
+var workoutRepository = new WorkoutRepository(workoutContainerResponse.Container);
+
+var userManager = new UserManager(userRepository);
+var workoutLogger = new WorkoutLogger(userRepository, workoutRepository);
 
 Console.WriteLine("✓ Cosmos DB connection initialized.\n");
 
@@ -55,13 +67,13 @@ while (running)
     switch (choice)
     {
         case "1":
-            await AddUser(userRepository);
+            await userManager.AddUserAsync();
             break;
         case "2":
-            await GetUserProfile(userRepository);
+            await userManager.GetUserProfileAsync();
             break;
         case "3":
-            Console.WriteLine("📝 Log workout functionality - Coming soon");
+            await workoutLogger.LogWorkoutAsync();
             break;
         case "4":
             Console.WriteLine("📊 View progress functionality - Coming soon");
@@ -78,69 +90,9 @@ while (running)
             break;
     }
 
-    if (running && choice != "1" && choice != "2")
+    if (running && choice != "1" && choice != "2" && choice != "3")
     {
         Console.WriteLine();
     }
 }
 
-async Task AddUser(UserRepository repository)
-{
-    Console.Write("\nEnter user name: ");
-    var name = Console.ReadLine();
-    
-    Console.Write("Enter email: ");
-    var email = Console.ReadLine();
-
-    if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email))
-    {
-        Console.WriteLine("❌ Name and email are required.\n");
-        return;
-    }
-
-    try
-    {
-        var user = User.Create(name, email);
-        var createdUser = await repository.CreateUserAsync(user);
-        Console.WriteLine($"✓ User created successfully!");
-        Console.WriteLine($"  ID: {createdUser.Id}");
-        Console.WriteLine($"  Email: {createdUser.Email}");
-        Console.WriteLine($"  Name: {createdUser.Name}\n");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ Error creating user: {ex.Message}\n");
-    }
-}
-
-async Task GetUserProfile(UserRepository repository)
-{
-    Console.Write("\nEnter email to search: ");
-    var email = Console.ReadLine();
-
-    if (string.IsNullOrWhiteSpace(email))
-    {
-        Console.WriteLine("❌ Email is required.\n");
-        return;
-    }
-
-    try
-    {
-        var user = await repository.GetUserByEmailAsync(email);
-        if (user is null)
-        {
-            Console.WriteLine($"❌ No user found with email: {email}\n");
-        }
-        else
-        {
-            Console.WriteLine($"\n✓ User found:");
-            Console.WriteLine($"  ID: {user.Id}");
-            Console.WriteLine($"  Email: {user.Email}");
-            Console.WriteLine($"  Name: {user.Name}\n");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ Error retrieving user: {ex.Message}\n");
-    }
-}
