@@ -6,15 +6,18 @@ A .NET 8 console application that helps users track workouts, monitor progress, 
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 1 | Add a new user | Register with name and email |
-| 2 | Get user profile | Look up a user by email |
-| 3 | Log workout details | Log exercises with sets, reps, and weight. Supports multiple logs in one session |
-| 4 | View progress | View all workout logs grouped by day with AI-powered insights |
-| 5 | Check readiness for next level | Evaluates if you are ready to increase weight based on consistency, duration, and pain assessment |
-| 6 | AI Workout Plan Generator | Generates a weekly workout plan based on your history and goals |
-| 7 | Form and Technique Tips | Get proper form guidance for any exercise |
-| 8 | Recovery Advisor | Personalized recovery advice based on sleep, energy, pain, and recent workouts |
-| 9 | Nutrition Suggestions | Pre/post workout meal suggestions based on workout type, goals, and dietary restrictions |
+| 1 | AI Chat Coach | Free-form chat with an AI fitness coach. Ask anything about workouts, nutrition, or recovery |
+| 2 | Add a new user | Register with name and email |
+| 3 | Get user profile | Look up a user by email |
+| 4 | Log workout details | Log exercises with sets, reps, and weight. Supports multiple logs in one session |
+| 5 | View progress | View all workout logs grouped by day with AI-powered insights |
+| 6 | Check readiness for next level | Evaluates if you are ready to increase weight based on consistency, duration, and pain assessment |
+| 7 | AI Workout Plan Generator | Generates a weekly workout plan based on your history and goals |
+| 8 | Form and Technique Tips | Get proper form guidance for any exercise |
+| 9 | Recovery Advisor | Personalized recovery advice based on sleep, energy, pain, and recent workouts |
+| 10 | Nutrition Suggestions | Pre/post workout meal suggestions based on workout type, goals, and dietary restrictions |
+| 11 | Injury Risk Predictor | Analyzes workout patterns to warn about overtraining, rapid weight jumps, and muscle imbalances |
+| 12 | Exercise Alternatives | Suggests substitute exercises based on your reason (injury, no equipment, variety, difficulty) |
 
 ## Tech Stack
 
@@ -56,10 +59,13 @@ WorkoutGuideService/
 
   AiService/
     WorkoutAiAdvisor.cs             # Core Azure OpenAI client wrapper
+    AiChatCoach.cs                  # Free-form AI fitness chat
     WorkoutPlanGenerator.cs         # AI weekly workout plan generation
     FormTipAdvisor.cs               # AI form and technique tips
     RecoveryAdvisor.cs              # AI recovery advice
     NutritionAdvisor.cs             # AI nutrition suggestions
+    InjuryRiskPredictor.cs          # AI overtraining and injury risk analysis
+    ExerciseAlternativeAdvisor.cs   # AI exercise substitute suggestions
 ```
 
 ## Workout Days and Exercises

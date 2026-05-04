@@ -70,6 +70,9 @@ var planGenerator = new WorkoutPlanGenerator(userRepository, workoutRepository, 
 var formTipAdvisor = new FormTipAdvisor(aiAdvisor);
 var recoveryAdvisor = new RecoveryAdvisor(userRepository, workoutRepository, aiAdvisor);
 var nutritionAdvisor = new NutritionAdvisor(userRepository, workoutRepository, aiAdvisor);
+var chatCoach = new AiChatCoach(aiAdvisor);
+var injuryPredictor = new InjuryRiskPredictor(userRepository, workoutRepository, aiAdvisor);
+var alternativeAdvisor = new ExerciseAlternativeAdvisor(aiAdvisor);
 
 Console.WriteLine("Cosmos DB and Azure OpenAI initialized.\n");
 
@@ -78,50 +81,62 @@ bool running = true;
 while (running)
 {
     Console.WriteLine("=== Workout Guide System ===");
-    Console.WriteLine("1.  Add a new user");
-    Console.WriteLine("2.  Get user profile");
-    Console.WriteLine("3.  Log workout details");
-    Console.WriteLine("4.  View progress");
-    Console.WriteLine("5.  Check readiness for next level");
-    Console.WriteLine("6.  AI Workout Plan Generator");
-    Console.WriteLine("7.  Form and Technique Tips");
-    Console.WriteLine("8.  Recovery Advisor");
-    Console.WriteLine("9.  Nutrition Suggestions");
-    Console.WriteLine("10. Exit");
-    Console.Write("\nSelect an option (1-10): ");
+    Console.WriteLine("1.  AI Chat Coach");
+    Console.WriteLine("2.  Add a new user");
+    Console.WriteLine("3.  Get user profile");
+    Console.WriteLine("4.  Log workout details");
+    Console.WriteLine("5.  View progress");
+    Console.WriteLine("6.  Check readiness for next level");
+    Console.WriteLine("7.  AI Workout Plan Generator");
+    Console.WriteLine("8.  Form and Technique Tips");
+    Console.WriteLine("9.  Recovery Advisor");
+    Console.WriteLine("10. Nutrition Suggestions");
+    Console.WriteLine("11. Injury Risk Predictor");
+    Console.WriteLine("12. Exercise Alternatives");
+    Console.WriteLine("13. Exit");
+    Console.Write("\nSelect an option (1-13): ");
     
     var choice = Console.ReadLine();
 
     switch (choice)
     {
         case "1":
-            await userManager.AddUserAsync();
+            await chatCoach.StartChatAsync();
             break;
         case "2":
-            await userManager.GetUserProfileAsync();
+            await userManager.AddUserAsync();
             break;
         case "3":
-            await workoutLogger.LogWorkoutAsync();
+            await userManager.GetUserProfileAsync();
             break;
         case "4":
-            await progressViewer.ViewProgressAsync();
+            await workoutLogger.LogWorkoutAsync();
             break;
         case "5":
-            await readinessChecker.CheckReadinessAsync();
+            await progressViewer.ViewProgressAsync();
             break;
         case "6":
-            await planGenerator.GeneratePlanAsync();
+            await readinessChecker.CheckReadinessAsync();
             break;
         case "7":
-            await formTipAdvisor.GetFormTipsAsync();
+            await planGenerator.GeneratePlanAsync();
             break;
         case "8":
-            await recoveryAdvisor.GetRecoveryAdviceAsync();
+            await formTipAdvisor.GetFormTipsAsync();
             break;
         case "9":
-            await nutritionAdvisor.GetNutritionAdviceAsync();
+            await recoveryAdvisor.GetRecoveryAdviceAsync();
             break;
         case "10":
+            await nutritionAdvisor.GetNutritionAdviceAsync();
+            break;
+        case "11":
+            await injuryPredictor.AnalyzeRiskAsync();
+            break;
+        case "12":
+            await alternativeAdvisor.SuggestAlternativesAsync();
+            break;
+        case "13":
             running = false;
             Console.WriteLine("\nGoodbye!");
             break;
