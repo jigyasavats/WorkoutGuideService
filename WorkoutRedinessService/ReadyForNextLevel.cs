@@ -1,3 +1,5 @@
+using System.Text;
+using AiService;
 using Enums;
 using Repository;
 
@@ -7,14 +9,16 @@ public sealed class ReadyForNextLevel
 {
     private readonly UserRepository _userRepository;
     private readonly WorkoutRepository _workoutRepository;
+    private readonly WorkoutAiAdvisor _aiAdvisor;
     private const double WeightIncrement = 2.5;
     private const int MinimumMonths = 2;
     private const int MinimumSessions = 8;
 
-    public ReadyForNextLevel(UserRepository userRepository, WorkoutRepository workoutRepository)
+    public ReadyForNextLevel(UserRepository userRepository, WorkoutRepository workoutRepository, WorkoutAiAdvisor aiAdvisor)
     {
         _userRepository = userRepository;
         _workoutRepository = workoutRepository;
+        _aiAdvisor = aiAdvisor;
     }
 
     public async Task CheckReadinessAsync()
@@ -99,6 +103,20 @@ public sealed class ReadyForNextLevel
 
         // Display result
         DisplayResult(selectedDay, selectedExercise, result);
+
+        // AI-powered advice
+        var readinessData = new StringBuilder();
+        readinessData.AppendLine($"Exercise: {selectedExercise} ({selectedDay} Day)");
+        readinessData.AppendLine($"Total sessions: {result.TotalSessions}");
+        readinessData.AppendLine($"Months active: {result.ConsistentMonths}");
+        readinessData.AppendLine($"Current weight: {result.CurrentWeightKg} kg");
+        readinessData.AppendLine($"Knee pain: {(result.Pain.KneePain ? "Yes" : "No")}");
+        readinessData.AppendLine($"Back pain: {(result.Pain.BackPain ? "Yes" : "No")}");
+        readinessData.AppendLine($"Pain during workout: {(result.Pain.DuringWorkoutPain ? "Yes" : "No")}");
+        readinessData.AppendLine($"Consistent at weight: {(result.ConsistentWeight ? "Yes" : "No")}");
+        readinessData.AppendLine($"Ready: {(result.IsReady ? "Yes" : "No")}");
+
+        await _aiAdvisor.GetReadinessAdviceAsync(readinessData.ToString());
     }
 
     private ReadinessResult EvaluateReadiness(

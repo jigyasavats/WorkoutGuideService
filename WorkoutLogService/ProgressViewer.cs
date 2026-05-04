@@ -1,3 +1,5 @@
+using System.Text;
+using AiService;
 using Repository;
 
 namespace WorkoutLogService;
@@ -6,11 +8,13 @@ public sealed class ProgressViewer
 {
     private readonly UserRepository _userRepository;
     private readonly WorkoutRepository _workoutRepository;
+    private readonly WorkoutAiAdvisor _aiAdvisor;
 
-    public ProgressViewer(UserRepository userRepository, WorkoutRepository workoutRepository)
+    public ProgressViewer(UserRepository userRepository, WorkoutRepository workoutRepository, WorkoutAiAdvisor aiAdvisor)
     {
         _userRepository = userRepository;
         _workoutRepository = workoutRepository;
+        _aiAdvisor = aiAdvisor;
     }
 
     public async Task ViewProgressAsync()
@@ -41,6 +45,9 @@ public sealed class ProgressViewer
                 return;
             }
 
+            var progressSummary = new StringBuilder();
+            progressSummary.AppendLine($"Workout Progress for {user.Name} ({user.Email})");
+
             Console.WriteLine($"\nWorkout Progress for {user.Name} ({user.Email})");
             Console.WriteLine(new string('-', 50));
 
@@ -51,14 +58,19 @@ public sealed class ProgressViewer
             foreach (var dayGroup in groupedByDay)
             {
                 Console.WriteLine($"\n  [{dayGroup.Key} Day] - {dayGroup.Count()} log(s)");
+                progressSummary.AppendLine($"{dayGroup.Key} Day - {dayGroup.Count()} sessions:");
 
                 foreach (var log in dayGroup.OrderByDescending(l => l.LoggedAt))
                 {
                     Console.WriteLine($"    {log.Exercise,-20} | Sets: {log.Sets} | Reps: {log.Reps} | Weight: {log.WeightKg} kg | {log.LoggedAt:yyyy-MM-dd HH:mm} UTC");
+                    progressSummary.AppendLine($"  {log.Exercise}: {log.Sets} sets x {log.Reps} reps at {log.WeightKg} kg ({log.LoggedAt:yyyy-MM-dd})");
                 }
             }
 
-            Console.WriteLine($"\nTotal workouts logged: {logs.Count}\n");
+            Console.WriteLine($"\nTotal workouts logged: {logs.Count}");
+
+            // AI-powered insight
+            await _aiAdvisor.GetProgressInsightAsync(progressSummary.ToString());
         }
         catch (Exception ex)
         {

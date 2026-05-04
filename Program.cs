@@ -5,6 +5,7 @@ using Repository;
 using UserService;
 using WorkoutLogService;
 using WorkoutRedinessService;
+using AiService;
 
 var config = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -16,14 +17,20 @@ var secretName = config["CosmosDb:ConnectionStringSecretName"];
 var databaseId = config["CosmosDb:DatabaseId"];
 var containerId = config["CosmosDb:ContainerId"];
 var workoutContainerId = config["CosmosDb:WorkoutContainerId"];
+var openAiEndpoint = config["AzureOpenAi:Endpoint"];
+var openAiKeySecretName = config["AzureOpenAi:ApiKeySecretName"];
+var openAiDeploymentName = config["AzureOpenAi:DeploymentName"];
 
 if (string.IsNullOrWhiteSpace(vaultUri)
     || string.IsNullOrWhiteSpace(secretName)
     || string.IsNullOrWhiteSpace(databaseId)
     || string.IsNullOrWhiteSpace(containerId)
-    || string.IsNullOrWhiteSpace(workoutContainerId))
+    || string.IsNullOrWhiteSpace(workoutContainerId)
+    || string.IsNullOrWhiteSpace(openAiEndpoint)
+    || string.IsNullOrWhiteSpace(openAiKeySecretName)
+    || string.IsNullOrWhiteSpace(openAiDeploymentName))
 {
-    Console.WriteLine("Key Vault or Cosmos DB configuration is missing. Please update appsettings.json.");
+    Console.WriteLine("Configuration is missing. Please update appsettings.json.");
     return;
 }
 
@@ -37,6 +44,15 @@ if (string.IsNullOrWhiteSpace(cosmosConnectionString))
     return;
 }
 
+var openAiKeySecret = await secretClient.GetSecretAsync(openAiKeySecretName);
+var openAiApiKey = openAiKeySecret.Value.Value;
+
+if (string.IsNullOrWhiteSpace(openAiApiKey))
+{
+    Console.WriteLine("Azure OpenAI API key secret is empty.");
+    return;
+}
+
 var cosmosService = await CosmosDbService.CreateAsync(cosmosConnectionString, databaseId);
 
 var userContainerResponse = await cosmosService.Database.CreateContainerIfNotExistsAsync(containerId, "/Email");
@@ -47,10 +63,11 @@ var workoutRepository = new WorkoutRepository(workoutContainerResponse.Container
 
 var userManager = new UserManager(userRepository);
 var workoutLogger = new WorkoutLogger(userRepository, workoutRepository);
-var progressViewer = new ProgressViewer(userRepository, workoutRepository);
-var readinessChecker = new ReadyForNextLevel(userRepository, workoutRepository);
+var aiAdvisor = new WorkoutAiAdvisor(openAiEndpoint, openAiApiKey, openAiDeploymentName);
+var progressViewer = new ProgressViewer(userRepository, workoutRepository, aiAdvisor);
+var readinessChecker = new ReadyForNextLevel(userRepository, workoutRepository, aiAdvisor);
 
-Console.WriteLine("✓ Cosmos DB connection initialized.\n");
+Console.WriteLine("Cosmos DB and Azure OpenAI initialized.\n");
 
 bool running = true;
 
